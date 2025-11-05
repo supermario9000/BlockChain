@@ -31,7 +31,7 @@ int main() {
                 cout<<"Transactions generated."<<endl;
 
                 cout<<"Generating blocks..."<<endl;
-                generateBlockData(transactions, blocks, 100); // 100 transactions per block
+                generateBlockData(transactions, blocks, 100, users); // 100 transactions per block
                 cout<<"100 blocks generated."<<endl;
                 cout<<"Data generation complete. 🎉 \n"<<endl;
 

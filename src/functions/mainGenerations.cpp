@@ -1,5 +1,6 @@
 #include "../headers/helperFunctionPrototypes.hpp"
 #include "../headers/hash_function.hpp"
+#include <algorithm>
 
 // Small terminal progress bar helper
 static void printProgressBar(size_t current, size_t total) {
@@ -41,7 +42,7 @@ void generateTransactionData(const vector<User>& users, vector<Transaction>& tra
     }
 }
 
-void generateBlockData(const vector<Transaction>& transactions, vector<Block>& blocks, int numTransactionsPerBlock) {
+void generateBlockData(const vector<Transaction>& transactions, vector<Block>& blocks, int numTransactionsPerBlock, vector<User>& users) {
     // using hash_function.hpp
     if (transactions.empty() || numTransactionsPerBlock <= 0) return;
     size_t txCount = transactions.size();
@@ -49,7 +50,26 @@ void generateBlockData(const vector<Transaction>& transactions, vector<Block>& b
     for (size_t i = 0; i < totalBlocks; ++i) {
         Block newBlock;
         for (int j = 0; j < numTransactionsPerBlock && (i * static_cast<size_t>(numTransactionsPerBlock) + j) < txCount; ++j) {
-            newBlock.addTransaction(transactions[i * static_cast<size_t>(numTransactionsPerBlock) + j]);
+            size_t tx_idx = i * static_cast<size_t>(numTransactionsPerBlock) + j;
+            const Transaction &tx = transactions[tx_idx];
+            newBlock.addTransaction(tx);
+            // update UTXOs: spend from sender, add to receiver
+            double amt = tx.getAmount();
+            string sender = tx.getSenderKey();
+            string receiver = tx.getReceiverKey();
+            // find sender
+            auto s_it = std::find_if(users.begin(), users.end(), [&](const User &u){ return u.getPublicKey() == sender; });
+            if (s_it != users.end()) {
+                bool spent = s_it->spendUTXO(amt);
+                if (!spent) {
+                    cout << "Warning: sender " << sender << " had insufficient funds for tx " << tx.getTransactionId() << endl;
+                }
+            }
+            // find receiver and credit
+            auto r_it = std::find_if(users.begin(), users.end(), [&](const User &u){ return u.getPublicKey() == receiver; });
+            if (r_it != users.end()) {
+                r_it->addUTXO(amt);
+            }
         }
         // calculating the header fields
         newBlock.setPreviousHash(blocks.empty() ? "" : blocks.back().getBlockHash());
