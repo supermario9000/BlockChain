@@ -31,9 +31,9 @@ class Block {
         }
 
         string getBlockHeaderInfo() const {
-            return "Version: " + version + ", Previous Hash: " + previousHash + ", Merkle Root: " + merkleRoot +
-                   ", Difficulty Target: " + to_string(difficultyTarget) + ", Timestamp: " + to_string(timestamp) +
-                   ", Nonce: " + to_string(nonce);
+            return "Version: " + version + "\nPrevious Hash: " + previousHash + "\nMerkle Root: " + merkleRoot +
+                   "\nDifficulty Target: " + to_string(difficultyTarget) + "\nTimestamp: " + to_string(timestamp) +
+                   "\nNonce: " + to_string(nonce);
         }
 
         int getTransactionCount() const {

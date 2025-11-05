@@ -52,7 +52,7 @@ int main() {
                         int user_choice;
                         cin >> user_choice;
                         while (true) {
-                            if (user_choice < 1 || user_choice > users.size()) {
+                            if (user_choice < 1 || user_choice > static_cast<int>(users.size())) {
                                 cout << "Invalid user selection." << endl;
                             } else {
                                 const User& selected_user = users[user_choice - 1];
@@ -66,15 +66,55 @@ int main() {
                         }
                         break;
                     case 2:
+                        if (transactions.empty()) {
+                            cout << "No transactions available. Generate data first." << endl;
+                            break;
+                        }
                         cout << "Total transactions: " << transactions.size() << endl;
-                        for (const auto& tx : transactions) {
-                            cout << tx.getTransactionDetails() << endl;
+                        cout << "Select a transaction to explore (1-" << transactions.size() << "), or 0 to go back: ";
+                        int tx_choice;
+                        cin >> tx_choice;
+                        while (true) {
+                            if (tx_choice == 0) break;
+                            if (tx_choice < 1 || tx_choice > static_cast<int>(transactions.size())) {
+                                cout << "Invalid transaction selection." << endl;
+                            } else {
+                                const Transaction &selected_tx = transactions[tx_choice - 1];
+                                cout << "Exploring transaction indexed at " << (tx_choice - 1) << ": \n" << selected_tx.getTransactionDetails() << endl;
+                            }
+                            cout << "Enter another transaction number to explore or 0 to go back: ";
+                            cin >> tx_choice;
                         }
                         break;
                     case 3:
+                        if (blocks.empty()) {
+                            cout << "No blocks available. Generate data first." << endl;
+                            break;
+                        }
                         cout << "Total blocks: " << blocks.size() << endl;
-                        for (const auto& block : blocks) {
-                            cout << block.getBlockHeaderInfo() << ", Transactions: " << block.getTransactionCount() << endl;
+                        cout << "Select a block to explore (1-" << blocks.size() << "), or 0 to go back: ";
+                        int blk_choice;
+                        cin >> blk_choice;
+                        while (true) {
+                            if (blk_choice == 0) break;
+                            if (blk_choice < 1 || blk_choice > static_cast<int>(blocks.size())) {
+                                cout << "Invalid block selection." << endl;
+                            } else {
+                                const Block &selected_block = blocks[blk_choice - 1];
+                                cout << "Exploring block: \n" << selected_block.getBlockHeaderInfo() << "\nTransactions: " << selected_block.getTransactionCount() << endl;
+
+                                cout << "Do you want to see transaction summaries inside the block? (y/n)" << endl;
+                                char see_summaries;
+                                cin >> see_summaries;
+                                if (see_summaries == 'y' || see_summaries == 'Y') {
+                                    auto summaries = selected_block.getTransactionSummaries();
+                                    for (size_t ti = 0; ti < summaries.size(); ++ti) {
+                                        cout << "  [" << (ti + 1) << "] " << summaries[ti] << endl;
+                                    }
+                                }
+                            }
+                            cout << "Enter another block number to explore or 0 to go back: ";
+                            cin >> blk_choice;
                         }
                         break;
                     default:

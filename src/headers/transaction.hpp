@@ -31,7 +31,7 @@ class Transaction {
         }
 
         string getTransactionDetails() const {
-            return "Transaction ID: " + transaction_id + ", From: " + sender_key + ", To: " + receiver_key + ", Amount: " + to_string(amount);
+            return "Transaction ID: " + transaction_id + "\nFrom: " + sender_key + "\nTo: " + receiver_key + "\nAmount: " + to_string(amount);
         }
 
         string getTransactionSummary() const {

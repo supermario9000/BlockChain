@@ -30,18 +30,34 @@ inline void hashFunkcija(string input, string &hash){
     int pradinis_skyrius = suma;
     while (pradinis_skyrius > skyriu_sk) pradinis_skyrius -= skyriu_sk;
 
-    //pati hash funkcija
-    for(int i=0; i<32; i++)
-    {
-        hash += desimtaine_i_16(konvertuota_ivestis[i] ^ nuskaityti_binary_duomenys[pradinis_skyrius * 32 + i] ^ konvertuota_druskyte[i]);
+    // primary pass: produce up to 32 bytes (64 hex chars). Guard indexes to avoid UB.
+    for (size_t i = 0; i < 32; ++i) {
+        size_t mp3_idx = static_cast<size_t>(pradinis_skyrius) * 32 + i;
+        int a = 0, b = 0, c = 0;
+        if (i < konvertuota_ivestis.size()) a = konvertuota_ivestis[i];
+        if (mp3_idx < nuskaityti_binary_duomenys.size()) b = nuskaityti_binary_duomenys[mp3_idx];
+        if (i < konvertuota_druskyte.size()) c = konvertuota_druskyte[i];
+        hash += desimtaine_i_16(a ^ b ^ c);
     }
-    int i=0;
-    while (hash.length()<64) 
-    {
-        hash += desimtaine_i_16(konvertuota_ivestis[i] ^ nuskaityti_binary_duomenys[pradinis_skyrius * (32 + i)] ^ konvertuota_druskyte[i]);
+
+    // secondary pass: fill until 64 hex chars. Increment index to avoid infinite loop and use safe modulo indexing.
+    size_t ii = 0;
+    while (hash.length() < 64) {
+        if (konvertuota_ivestis.empty() || nuskaityti_binary_duomenys.empty() || konvertuota_druskyte.empty()) {
+            hash += "00"; // fallback byte
+        } else {
+            size_t a_idx = ii % konvertuota_ivestis.size();
+            size_t b_idx = (static_cast<size_t>(pradinis_skyrius) * 32 + (ii % 32)) % nuskaityti_binary_duomenys.size();
+            size_t c_idx = ii % konvertuota_druskyte.size();
+            int a = konvertuota_ivestis[a_idx];
+            int b = nuskaityti_binary_duomenys[b_idx];
+            int c = konvertuota_druskyte[c_idx];
+            hash += desimtaine_i_16(a ^ b ^ c);
+        }
+        ++ii;
     }
-    if(hash.length()>64) hash = hash.substr(0,64);
-    
+    if (hash.length() > 64) hash = hash.substr(0, 64);
+
     // cached data left intact for future calls
     konvertuota_ivestis.clear();
     konvertuota_druskyte.clear();
@@ -49,18 +65,11 @@ inline void hashFunkcija(string input, string &hash){
 
 //these functions are taken from my earlier project which was creating a hash function. Optimized for this project.
 inline string desimtaine_i_16(int desimtaine){
-    string hex = "";
-    int liekana;
-    char simbolis;
-    while(desimtaine != 0){
-        if(desimtaine <0 ) desimtaine = (-1) * desimtaine; //jei ivedami lietuviški simboliai, jų reikšmė būna minusinė. Tai trikdo veiklai.
-        liekana = desimtaine % 16;
-        if (liekana < 10) simbolis = liekana + '0';
-        else simbolis = liekana - 10 + 'A';
-        hex = simbolis + hex;
-        desimtaine /= 16;
-    }
-    return hex;
+    // Always produce two hex digits for a byte (00..FF).
+    unsigned int v = static_cast<unsigned int>(desimtaine) & 0xFFu;
+    std::ostringstream oss;
+    oss << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << v;
+    return oss.str();
 }
 
 inline string druskyte (string input){

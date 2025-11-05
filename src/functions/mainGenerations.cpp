@@ -61,7 +61,6 @@ void generateBlockData(const vector<Transaction>& transactions, vector<Block>& b
         blocks.push_back(newBlock);
         // update progress bar
         printProgressBar(i + 1, totalBlocks);
-        if (i == 0) std::cout << "\nGenesis block generated." << std::endl;
     }
     // finish line
     std::cout << std::endl;
