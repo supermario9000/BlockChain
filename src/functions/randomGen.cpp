@@ -84,4 +84,3 @@ double generateTransactionAmount(double max_amount) {
     
     return amount_dist(eng);
 }
-

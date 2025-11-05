@@ -1,4 +1,4 @@
-#include "src/headers/lib.hpp"
+#include "src/headers/helperFunctionPrototypes.hpp"
 
 int main() {
     cout<<"You are running a simulation of a centralized blockchain network."<<endl;
@@ -12,9 +12,24 @@ int main() {
     cin >> choice;
     switch (choice) {
         case 1:
-            cout << "Generating data..." << endl;
-            // Call function to generate data
-            // Cout updates after generating each component
+            vector<User> users;
+            vector<Transaction> transactions;
+            vector<Block> blocks;
+            cout<< "Generating data..."<<endl;
+            cout<<"Generating 1000 users..."<<endl;
+            generateUserData(users, 1000);
+            cout<<"Users generated."<<endl;
+
+            cout<<"Generating 10000 transactions..."<<endl;
+            generateTransactionData(users, transactions, 10000);
+            cout<<"Transactions generated."<<endl;
+            
+            cout<<"Generating blocks..."<<endl;
+            cout<<"Genesis block generated."<<endl;
+            cout<<"100 blocks generated."<<endl;
+            cout<<"Data generation complete. 🎉"<<endl;
+
+            cout<<"You can now explore the data or try mining blocks."<<endl;
             break;
         case 2:
             cout << "What would you like to explore?" << endl;
