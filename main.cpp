@@ -8,7 +8,7 @@ int main() {
     cout<<"You are running a simulation of a centralized blockchain network."<<endl;
 
     while (true) {
-        cout<<"Action menu:"<<endl;
+        cout<<"\nAction menu:"<<endl;
         cout << "1. Generate data" << endl; //with blocks, transactions, users
         cout << "2. Explore generated data" << endl;
         cout << "3. Mine blocks" << endl;
@@ -22,25 +22,33 @@ int main() {
 
                 cout<<"Generating 1000 users..."<<endl;
                 generateUserData(users, 1000);
-                writeUsersCsv(users, "users.csv");
+                //writeUsersCsv(users, "users.csv");
                 cout<<"Users generated."<<endl;
 
                 cout<<"Generating 10000 transactions..."<<endl;
                 generateTransactionData(users, transactions, 10000);
-                writeTransactionsCsv(transactions, "transactions.csv");
+                //writeTransactionsCsv(transactions, "transactions.csv");
                 cout<<"Transactions generated."<<endl;
 
-                cout<<"Generating blocks..."<<endl;
-                generateBlockData(transactions, blocks, 100, users); // 100 transactions per block
-                cout<<"100 blocks generated."<<endl;
+                cout<<"Do you want to generate blocks now? (y/n): ";
+                char gen_blocks_choice;
+                cin >> gen_blocks_choice;
+                if (gen_blocks_choice == 'y' || gen_blocks_choice == 'Y') {
+                    cout<<"Generating blocks..."<<endl;
+                    generateBlockData(transactions, blocks, 100, users); // 100 transactions per block
+                    cout<<"100 blocks generated."<<endl;
+                }
                 cout<<"Data generation complete. 🎉 \n"<<endl;
 
                 cout<<"You can now explore the data or try mining blocks."<<endl;
-                cout<<"Enter any key to continue..."<<endl;
-                cin.ignore();
                 break;
             case 2:
-                cout << "What would you like to explore?" << endl;
+                // require generated data first
+                if (users.empty() || transactions.empty()) {
+                    cout << "Please generate data first (choose menu option 1)." << endl;
+                    break;
+                }
+                cout << "\nWhat would you like to explore?" << endl;
                 cout << "1. Users" << endl;
                 cout << "2. Transactions" << endl;
                 cout << "3. Blocks" << endl;
@@ -56,9 +64,9 @@ int main() {
                                 cout << "Invalid user selection." << endl;
                             } else {
                                 const User& selected_user = users[user_choice - 1];
-                                cout << "Exploring user: " << selected_user.getUserInfo() << endl;
+                                cout << "Exploring user: \n" << selected_user.getUserInfo() << endl;
                             }
-                            cout << "Enter another user number to explore or 0 to go back: ";
+                            cout << "\nEnter another user number to explore or 0 to go back: ";
                             cin >> user_choice;
                             if (user_choice == 0) {
                                 break;
@@ -80,9 +88,9 @@ int main() {
                                 cout << "Invalid transaction selection." << endl;
                             } else {
                                 const Transaction &selected_tx = transactions[tx_choice - 1];
-                                cout << "Exploring transaction indexed at " << (tx_choice - 1) << ": \n" << selected_tx.getTransactionDetails() << endl;
+                                cout << "\nExploring transaction indexed at " << (tx_choice - 1) << ": \n" << selected_tx.getTransactionDetails() << endl;
                             }
-                            cout << "Enter another transaction number to explore or 0 to go back: ";
+                            cout << "\nEnter another transaction number to explore or 0 to go back: ";
                             cin >> tx_choice;
                         }
                         break;
@@ -101,7 +109,7 @@ int main() {
                                 cout << "Invalid block selection." << endl;
                             } else {
                                 const Block &selected_block = blocks[blk_choice - 1];
-                                cout << "Exploring block: \n" << selected_block.getBlockHeaderInfo() << "\nTransactions: " << selected_block.getTransactionCount() << endl;
+                                cout << "\nExploring block: \n" << selected_block.getBlockHeaderInfo() << "\nTransactions: " << selected_block.getTransactionCount() << endl;
 
                                 cout << "Do you want to see transaction summaries inside the block? (y/n)" << endl;
                                 char see_summaries;
@@ -113,7 +121,7 @@ int main() {
                                     }
                                 }
                             }
-                            cout << "Enter another block number to explore or 0 to go back: ";
+                            cout << "\nEnter another block number to explore or 0 to go back: ";
                             cin >> blk_choice;
                         }
                         break;
@@ -124,8 +132,29 @@ int main() {
 
                 break;
             case 3:
-                cout << "Mining blocks..." << endl;
-                // Call function to mine blocks
+                // require blocks to exist before mining
+                if (users.empty() || transactions.empty()) {
+                    cout << "Please generate data first (choose menu option 1)." << endl;
+                    break;
+                }
+                cout<<"How long do you want to mine? (in seconds): ";
+                int miningDuration;
+                cin >> miningDuration;
+
+                cout << "Mining blocks for " << miningDuration << " seconds..." << endl;
+                {
+                    using clock = steady_clock;
+                    auto start = clock::now();
+                    auto deadline = start + seconds(miningDuration);
+                    int mined_count = 0;
+                    // keep mining one block at a time until deadline or mempool empty
+                    while (clock::now() < deadline && !transactions.empty()) {
+                        bool mined = mineBlocks(blocks, transactions, deadline);
+                        if (!mined) break; // time expired during mining or nothing to mine
+                        ++mined_count;
+                    }
+                    cout << "Mining session finished. Blocks mined: " << mined_count << "\n";
+                }
                 break;
             case 4:
                 cout << "Exiting program." << endl;
@@ -137,6 +166,8 @@ int main() {
     }
     return 0;
 }
+
+//notes to self below
 
 /* kasimas grindziamas proof of work algoritmu.
 Tai reiskia, kad kiekvienas "kasejas" turi atlikti daug darbo, kol suras tinkama hash reiksme.

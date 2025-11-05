@@ -1,6 +1,5 @@
 #include "../headers/helperFunctionPrototypes.hpp"
 #include "../headers/hash_function.hpp"
-#include <algorithm>
 
 // Small terminal progress bar helper
 static void printProgressBar(size_t current, size_t total) {
@@ -8,14 +7,14 @@ static void printProgressBar(size_t current, size_t total) {
     if (total == 0) return;
     double fraction = double(current) / double(total);
     int pos = static_cast<int>(barWidth * fraction);
-    std::cout << '\r' << "Generating blocks: [";
+    cout << '\r' << "Generating blocks: [";
     for (int i = 0; i < barWidth; ++i) {
-        if (i < pos) std::cout << '=';
-        else if (i == pos) std::cout << '>';
-        else std::cout << ' ';
+        if (i < pos) cout << '=';
+        else if (i == pos) cout << '>';
+        else cout << ' ';
     }
     int percent = static_cast<int>(fraction * 100.0);
-    std::cout << "] " << percent << "%" << std::flush;
+    cout << "] " << percent << "%" << std::flush;
 }
 
 // use functions defined in randomGen.cpp to generate user data
@@ -62,7 +61,7 @@ void generateBlockData(const vector<Transaction>& transactions, vector<Block>& b
             if (s_it != users.end()) {
                 bool spent = s_it->spendUTXO(amt);
                 if (!spent) {
-                    cout << "Warning: sender " << sender << " had insufficient funds for tx " << tx.getTransactionId() << endl;
+                    //cout << "Warning: sender " << sender << " had insufficient funds for tx " << tx.getTransactionId() << endl;
                 }
             }
             // find receiver and credit
@@ -114,6 +113,7 @@ string calculateMerkleRoot(const vector<Transaction>& transactions) {
     return layer.front();
 }
 
+/* needed only for testing
 // CSV escaping: double internal quotes and wrap fields containing comma, quote or newline in quotes
 static string csvEscape(const string &s) {
     bool needQuotes = false;
@@ -173,4 +173,5 @@ void writeTransactionsCsv(const vector<Transaction>& transactions, const string&
     }
     out.close();
 }
+*/
 
