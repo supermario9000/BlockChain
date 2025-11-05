@@ -1,4 +1,21 @@
 #include "../headers/helperFunctionPrototypes.hpp"
+#include "../headers/hash_function.hpp"
+
+// Small terminal progress bar helper
+static void printProgressBar(size_t current, size_t total) {
+    const int barWidth = 50;
+    if (total == 0) return;
+    double fraction = double(current) / double(total);
+    int pos = static_cast<int>(barWidth * fraction);
+    std::cout << '\r' << "Generating blocks: [";
+    for (int i = 0; i < barWidth; ++i) {
+        if (i < pos) std::cout << '=';
+        else if (i == pos) std::cout << '>';
+        else std::cout << ' ';
+    }
+    int percent = static_cast<int>(fraction * 100.0);
+    std::cout << "] " << percent << "%" << std::flush;
+}
 
 // use functions defined in randomGen.cpp to generate user data
 void generateUserData(vector<User>& users, int numUsers) {
@@ -22,6 +39,60 @@ void generateTransactionData(const vector<User>& users, vector<Transaction>& tra
         Transaction newTx(tx_id, sender_key, receiver_key, amount);
         transactions.push_back(newTx);
     }
+}
+
+void generateBlockData(const vector<Transaction>& transactions, vector<Block>& blocks, int numTransactionsPerBlock) {
+    // using hash_function.hpp
+    if (transactions.empty() || numTransactionsPerBlock <= 0) return;
+    size_t txCount = transactions.size();
+    size_t totalBlocks = (txCount + static_cast<size_t>(numTransactionsPerBlock) - 1) / static_cast<size_t>(numTransactionsPerBlock);
+    for (size_t i = 0; i < totalBlocks; ++i) {
+        Block newBlock;
+        for (int j = 0; j < numTransactionsPerBlock && (i * static_cast<size_t>(numTransactionsPerBlock) + j) < txCount; ++j) {
+            newBlock.addTransaction(transactions[i * static_cast<size_t>(numTransactionsPerBlock) + j]);
+        }
+        // calculating the header fields
+        newBlock.setPreviousHash(blocks.empty() ? "" : blocks.back().getBlockHash());
+        newBlock.setMerkleRoot(calculateMerkleRoot(newBlock.transactions));
+        newBlock.setVersion("1.0");
+        newBlock.setDifficultyTarget(0); // example difficulty
+        newBlock.setTimestamp(std::time(0));
+        newBlock.setNonce(0); // to be set during mining
+        blocks.push_back(newBlock);
+        // update progress bar
+        printProgressBar(i + 1, totalBlocks);
+        if (i == 0) std::cout << "\nGenesis block generated." << std::endl;
+    }
+    // finish line
+    std::cout << std::endl;
+}
+
+string calculateMerkleRoot(const vector<Transaction>& transactions) {
+    if (transactions.empty()) return "";
+
+    vector<string> layer;
+    string hash;
+    for (const auto& tx : transactions) {
+        hashFunkcija(tx.getTransactionId(), hash);
+        layer.push_back(hash);
+    }
+    hash.clear();
+
+    while (layer.size() > 1) {
+        vector<string> nextLayer;
+        for (size_t i = 0; i < layer.size(); i += 2) {
+            if (i + 1 < layer.size()) {
+                string combined = layer[i] + layer[i + 1];
+                string hash;
+                hashFunkcija(combined, hash);
+                nextLayer.push_back(hash);
+            } else {
+                nextLayer.push_back(layer[i]);
+            }
+        }
+        layer = nextLayer;
+    }
+    return layer.front();
 }
 
 // CSV escaping: double internal quotes and wrap fields containing comma, quote or newline in quotes

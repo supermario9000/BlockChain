@@ -3,10 +3,18 @@
 
 #include "lib.hpp"
 
+//prototypes of helper functions used in the hash function
+inline string desimtaine_i_16(int desimtaine);
+inline string druskyte (string input);
+inline const vector<int>& getMp3Bytes();
+inline void KonvertCharIx10 (const string &input, vector<int> &konvertuota_ivestis);
+inline int Sumax10(const vector<int> &konvertuota_ivestis);
+inline void clearData(string &input, string &hash, string &salt, int &suma, vector<int> &konvertuota_ivestis, vector<int> &konvertuota_druskyte);
+
 //hash helper functions below
 inline void hashFunkcija(string input, string &hash){
 
-    vector<int> nuskaityti_binary_duomenys;
+    const vector<int> &nuskaityti_binary_duomenys = getMp3Bytes();
     vector<int> konvertuota_ivestis;
     vector<int> konvertuota_druskyte;
     int suma;
@@ -16,7 +24,7 @@ inline void hashFunkcija(string input, string &hash){
     KonvertCharIx10(input, konvertuota_ivestis);
     KonvertCharIx10(salt, konvertuota_druskyte);
     suma = Sumax10(konvertuota_ivestis);
-    nuskaitytimp3(nuskaityti_binary_duomenys);
+    // mp3 bytes loaded into nuskaityti_binary_duomenys via getMp3Bytes()
 
     int skyriu_sk = nuskaityti_binary_duomenys.size() / 32;
     int pradinis_skyrius = suma;
@@ -34,7 +42,7 @@ inline void hashFunkcija(string input, string &hash){
     }
     if(hash.length()>64) hash = hash.substr(0,64);
     
-    nuskaityti_binary_duomenys.clear();
+    // cached data left intact for future calls
     konvertuota_ivestis.clear();
     konvertuota_druskyte.clear();
 }
@@ -67,38 +75,41 @@ inline string druskyte (string input){
     return result;
 }
 
-inline void nuskaitytimp3(vector<int> &nuskaityti_binary_duomenys){
-    ifstream in("../irasas.mp3", ios::binary); //binary input output flag
-    if(!in){
-        cout<<"Failas nerastas"<<endl;
-        return;
+// Return mp3 bytes cached (read from disk only once). Subsequent calls return the same vector.
+inline const vector<int>& getMp3Bytes() {
+    static vector<int> cachedBytes;
+    if (!cachedBytes.empty()) return cachedBytes;
+
+    ifstream in("./irasas.mp3", ios::binary);
+    if (!in) {
+        cout << "Failas nerastas" << endl;
+        return cachedBytes; // empty
     }
-    else 
-    {
-        for(char byte; in.get(byte);)
-        {
-            if(byte != '\0') nuskaityti_binary_duomenys.push_back((unsigned char)byte);
-        }
+    for (char byte; in.get(byte);) {
+        if (byte != '\0') cachedBytes.push_back(static_cast<unsigned char>(byte));
     }
-    in.close();
+    // leave file closed by destructor
+    return cachedBytes;
 }
 
-inline void KonvertCharIx10 (string input, vector<int> &konvertuota_ivestis){
-    char simbolis;
-    for(int i=0; i<=input.length(); i++)
-    {
-        simbolis = input[i]; //null becomes 0, then 0 is 48
-        konvertuota_ivestis.push_back((int)simbolis);
+inline void KonvertCharIx10 (const string &input, vector<int> &konvertuota_ivestis){
+    konvertuota_ivestis.clear();
+    konvertuota_ivestis.reserve(input.size());
+    for (size_t i = 0; i < input.size(); ++i) {
+        // cast to unsigned char first to avoid negative values for non-ASCII
+        konvertuota_ivestis.push_back(static_cast<unsigned char>(input[i]));
     }
 }
 
-inline int Sumax10(vector<int> &konvertuota_ivestis){ //calculating the sum of all values as the "sector" for the read file
-    int suma = 0;
-    for(int i=0; i<konvertuota_ivestis.size(); i++){
+inline int Sumax10(const vector<int> &konvertuota_ivestis){ //calculating the sum of all values as the "sector" for the read file
+    long long suma = 0;
+    for (size_t i = 0; i < konvertuota_ivestis.size(); ++i) {
         suma += konvertuota_ivestis[i];
-        if (suma<0) suma *= -1;
+        if (suma < 0) suma = -suma;
     }
-    return suma;
+    // clamp to int range if necessary
+    if (suma > std::numeric_limits<int>::max()) return std::numeric_limits<int>::max();
+    return static_cast<int>(suma);
 }
 
 inline void clearData(string &input, string &hash, string &salt, int &suma, vector<int> &konvertuota_ivestis, vector<int> &konvertuota_druskyte){

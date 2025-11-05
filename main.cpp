@@ -22,14 +22,16 @@ int main() {
 
                 cout<<"Generating 1000 users..."<<endl;
                 generateUserData(users, 1000);
+                writeUsersCsv(users, "users.csv");
                 cout<<"Users generated."<<endl;
 
                 cout<<"Generating 10000 transactions..."<<endl;
                 generateTransactionData(users, transactions, 10000);
+                writeTransactionsCsv(transactions, "transactions.csv");
                 cout<<"Transactions generated."<<endl;
 
                 cout<<"Generating blocks..."<<endl;
-                cout<<"Genesis block generated."<<endl;
+                generateBlockData(transactions, blocks, 100); // 100 transactions per block
                 cout<<"100 blocks generated."<<endl;
                 cout<<"Data generation complete. 🎉 \n"<<endl;
 
