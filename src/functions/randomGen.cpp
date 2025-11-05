@@ -1,5 +1,4 @@
-#include "src/headers/lib.hpp"
-#include "src/headers/user.hpp"
+#include "../headers/helperFunctionPrototypes.hpp"
 
 string generateUsername() {
     // Function to generate a random username from predefined pools

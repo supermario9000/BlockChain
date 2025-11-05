@@ -24,5 +24,9 @@ using std::uniform_real_distribution;
 using std::ifstream;
 using std::ofstream;
 using std::ios;
+using std::stringstream;
+using std::fixed;
+using std::setprecision;
+using std::ostringstream;
 
 #endif // LIB_HPP

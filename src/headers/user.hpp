@@ -28,6 +28,10 @@ class User {
             }
             return total;
         }
+        
+        string getUserInfo() const {
+            return "Username: " + username + ", Public Key: " + public_key + ", Total Balance: " + to_string(getTotalBalance());
+        }
 
         void addUTXO(double amount) {
             UTXO_balance.push_back(amount);

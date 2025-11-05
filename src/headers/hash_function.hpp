@@ -4,7 +4,7 @@
 #include "lib.hpp"
 
 //hash helper functions below
-void hashFunkcija(string input, string &hash){
+inline void hashFunkcija(string input, string &hash){
 
     vector<int> nuskaityti_binary_duomenys;
     vector<int> konvertuota_ivestis;
@@ -67,7 +67,7 @@ inline string druskyte (string input){
     return result;
 }
 
-void nuskaitytimp3(vector<int> &nuskaityti_binary_duomenys){
+inline void nuskaitytimp3(vector<int> &nuskaityti_binary_duomenys){
     ifstream in("../irasas.mp3", ios::binary); //binary input output flag
     if(!in){
         cout<<"Failas nerastas"<<endl;
@@ -83,7 +83,7 @@ void nuskaitytimp3(vector<int> &nuskaityti_binary_duomenys){
     in.close();
 }
 
-void KonvertCharIx10 (string input, vector<int> &konvertuota_ivestis){
+inline void KonvertCharIx10 (string input, vector<int> &konvertuota_ivestis){
     char simbolis;
     for(int i=0; i<=input.length(); i++)
     {
@@ -92,7 +92,7 @@ void KonvertCharIx10 (string input, vector<int> &konvertuota_ivestis){
     }
 }
 
-int Sumax10(vector<int> &konvertuota_ivestis){ //calculating the sum of all values as the "sector" for the read file
+inline int Sumax10(vector<int> &konvertuota_ivestis){ //calculating the sum of all values as the "sector" for the read file
     int suma = 0;
     for(int i=0; i<konvertuota_ivestis.size(); i++){
         suma += konvertuota_ivestis[i];
@@ -101,7 +101,7 @@ int Sumax10(vector<int> &konvertuota_ivestis){ //calculating the sum of all valu
     return suma;
 }
 
-void clearData(string &input, string &hash, string &salt, int &suma, vector<int> &konvertuota_ivestis, vector<int> &konvertuota_druskyte){
+inline void clearData(string &input, string &hash, string &salt, int &suma, vector<int> &konvertuota_ivestis, vector<int> &konvertuota_druskyte){
     input.clear();
     hash.clear();
     salt.clear();
