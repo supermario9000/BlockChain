@@ -1,7 +1,42 @@
 #include "src/headers/lib.hpp"
 
 int main() {
-    cout << "Hello, Blockchain!" << endl;
+    cout<<"You are running a simulation of a centralized blockchain network."<<endl;
+    cout<<"Action menu:"<<endl;
+    cout << "1. Generate data" << endl; //with blocks, transactions, users
+    cout << "2. Explore generated data" << endl;
+    cout << "3. Mine blocks" << endl;
+    cout << "4. Exit" << endl;
+    cout << "Select an action (1-4): ";
+    int choice;
+    cin >> choice;
+    switch (choice) {
+        case 1:
+            cout << "Generating data..." << endl;
+            // Call function to generate data
+            // Cout updates after generating each component
+            break;
+        case 2:
+            cout << "What would you like to explore?" << endl;
+            cout << "1. Users" << endl;
+            cout << "2. Transactions" << endl;
+            cout << "3. Blocks" << endl;
+            int explore_choice;
+            cin >> explore_choice;
+            // Call function to explore data
+
+            break;
+        case 3:
+            cout << "Mining blocks..." << endl;
+            // Call function to mine blocks
+            break;
+        case 4:
+            cout << "Exiting program." << endl;
+            return 0;
+        default:
+            cout << "Invalid choice. Please select a valid action." << endl;
+            break;
+    }
     return 0;
 }
 
