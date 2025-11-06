@@ -23,7 +23,7 @@ This changes when using the parallel mining functions, as the second miner tries
 
 ## V0.2  
 
-Release link:
+Release link: https://github.com/supermario9000/BlockChain/releases/tag/blockchain_v0.2  
 This release comes with these features:
 * Parallel mining simulation;
 * Validation of transactions and balances;
