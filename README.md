@@ -45,7 +45,10 @@ By default, the mining function miner runs through the nonce in sequence.
 |5|13|11|10|10|10| 10.8 |
 |15|12|15|10|11|11| 11.8 |
 |30|13|11|13|16|12| 13 |
-|60|15|14|11|11|13| 12.8 |
+|60|15|14|11|11|13| 12.8 |  
+
+What to add next:
+* Random transaction selection when creating blocks (will be uncommitted to the release as teh update is not significant)
 
 ## V0.1
 
