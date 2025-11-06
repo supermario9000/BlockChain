@@ -21,17 +21,20 @@ void generateUserData(vector<class User>& users, int numUsers);
 void generateTransactionData(const vector<class User>& users, vector<class Transaction>& transactions, int numTransactions);
 void generateBlockData(const vector<class Transaction>& transactions, vector<class Block>& blocks, int numTransactionsPerBlock, vector<class User>& users);//only a simulation, not how a real block would work while mining
 
-// mining helpers
-// Mine a single block before the provided deadline. Returns true if a block was mined and appended.
-// Mine a single block before the provided deadline. Returns true if a block was mined and appended.
-// Note: mining now requires access to the users vector so UTXOs can be updated atomically on success.
-bool mineBlocks(vector<class Block>& blocks, vector<class Transaction>& mempool, vector<class User>& users, const std::chrono::steady_clock::time_point &deadline);
-// difficulty helper: compute difficulty based on already-mined blocks (ignores simulated blocks)
+// mining function and helpers
+// If randomNonce is true the miner will try random nonces instead of sequentially incrementing.
+bool mineBlocks(vector<class Block>& blocks, vector<class Transaction>& mempool, vector<class User>& users, const std::chrono::steady_clock::time_point &deadline, bool randomNonce = false, const string &minerLabel = "");
 int getDifficultyForBlock(const vector<class Block>& blocks);
 string calculateMerkleRoot(const vector<class Transaction>& transactions);//also a generation function helper
+
 // input checks
 bool hasSufficientBalance(const vector<class User>& users, const string &public_key, double amount);
 bool transactionIdExists(const vector<class Transaction>& transactions, const string &tx_id);
+
+// Parallel mining competition: run two miners in parallel on independent copies of the same.
+// 1st miner runs sequential nonce, miner 2 guesses the nonce randomly.
+// initial state for `durationSeconds`. Returns 1 if miner1 wins, 2 if miner2 wins, 0 for tie/no clear winner.
+int parallelMiningCompetition(const vector<class Block>& blocks, const vector<class Transaction>& mempool, const vector<class User>& users, int durationSeconds, int winThreshold = 2);
 
 // CSV output helpers
 //void writeUsersCsv(const vector<class User>& users, const string& filename);

@@ -2,10 +2,11 @@
 #define HASH_FUNCTION_HPP
 
 #include "lib.hpp"
+#include <mutex>
 
 //prototypes of helper functions used in the hash function
 inline string desimtaine_i_16(int desimtaine);
-inline string druskyte (string input);
+inline string druskyte (const string &input);
 inline const vector<int>& getMp3Bytes();
 inline void KonvertCharIx10 (const string &input, vector<int> &konvertuota_ivestis);
 inline int Sumax10(const vector<int> &konvertuota_ivestis);
@@ -72,14 +73,15 @@ inline string desimtaine_i_16(int desimtaine){
     return oss.str();
 }
 
-inline string druskyte (string input){
+inline string druskyte (const string &input){
     std::seed_seq seed(input.begin(), input.end());
-    std::mt19937 rng(seed);
+    std::mt19937_64 rng(seed);
     std::uniform_int_distribution<int> dist(0, 15);
     string result;
+    result.reserve(64);
     for (int i = 0; i < 64; ++i) {
         int val = dist(rng);
-        result += "0123456789ABCDEF"[val];//"0123456789ABCDEF" is a string containing all hexadecimal digits. [val] selects one based on the random value.
+        result += "0123456789ABCDEF"[val]; // pick hex digit
     }
     return result;
 }
@@ -87,17 +89,17 @@ inline string druskyte (string input){
 // Return mp3 bytes cached (read from disk only once). Subsequent calls return the same vector.
 inline const vector<int>& getMp3Bytes() {
     static vector<int> cachedBytes;
-    if (!cachedBytes.empty()) return cachedBytes;
-
-    ifstream in("./irasas.mp3", ios::binary);
-    if (!in) {
-        cout << "Failas nerastas" << endl;
-        return cachedBytes; // empty
-    }
-    for (char byte; in.get(byte);) {
-        if (byte != '\0') cachedBytes.push_back(static_cast<unsigned char>(byte));
-    }
-    // leave file closed by destructor
+    static std::once_flag initFlag;
+    std::call_once(initFlag, [](){
+        ifstream in("./irasas.mp3", ios::binary);
+        if (!in) {
+            cout << "Failas nerastas" << endl;
+            return; // leave cachedBytes empty
+        }
+        for (char byte; in.get(byte);) {
+            if (byte != '\0') cachedBytes.push_back(static_cast<unsigned char>(byte));
+        }
+    });
     return cachedBytes;
 }
 

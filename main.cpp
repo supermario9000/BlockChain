@@ -9,11 +9,12 @@ int main() {
 
     while (true) {
         cout<<"\nAction menu:"<<endl;
-        cout << "1. Generate data" << endl; //with blocks, transactions, users
-        cout << "2. Explore generated data" << endl;
-        cout << "3. Mine blocks" << endl;
-        cout << "4. Exit" << endl;
-        cout << "Select an action (1-4): ";
+    cout << "1. Generate data" << endl; //with blocks, transactions, users
+    cout << "2. Explore generated data" << endl;
+    cout << "3. Mine blocks (single-threaded)" << endl;
+    cout << "4. Parallel mining competition (two miners)" << endl;
+    cout << "5. Exit" << endl;
+    cout << "Select an action (1-5): ";
         int choice;
         cin >> choice;
         switch (choice) {
@@ -157,6 +158,33 @@ int main() {
                 }
                 break;
             case 4:
+                // Parallel competition (two independent miners)
+                if (users.empty() || transactions.empty()) {
+                    cout << "Please generate data first (choose menu option 1)." << endl;
+                    break;
+                }
+                cout<<"\nParallel mining works on two threads. 1st miner uses sequential nonces, 2nd miner uses random nonces."<<endl;
+                cout<<"Data of mined blocks by each miner will be printed in miner1_blocks.csv and miner2_blocks.csv files."<<endl;
+
+                cout << "\nParallel mining competition - duration (seconds): ";
+                {
+                    int compDuration = 0;
+                    cin >> compDuration;
+                    cout << "Win threshold (difference in blocks to declare winner, default 2): ";
+                    int winThreshold = 2;
+                    if (!(cin >> winThreshold)) {
+                        winThreshold = 2;
+                        cin.clear();
+                        string dummy; getline(cin, dummy);
+                    }
+                    cout << "Running competition for " << compDuration << "s with threshold " << winThreshold << "..." << endl;
+                    int winner = parallelMiningCompetition(blocks, transactions, users, compDuration, winThreshold);
+                    if (winner == 0) cout << "Competition ended with no clear winner." << endl;
+                    else cout << "Competition winner: miner " << winner << endl;
+                    cout << "(Note: this was a simulation on independent copies; program state was not modified.)" << endl;
+                }
+                break;
+            case 5:
                 cout << "Exiting program." << endl;
                 return 0;
             default:
