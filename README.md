@@ -42,13 +42,14 @@ By default, the mining function miner runs through the nonce in sequence.
 
 | time, s | try 1, blocks mined | try 2, blocks mined | try 3, blocks mined | try 4, blocks mined | try 5, blocks mined | Average blocks mined |
 | ------- | ------------------- | ------------------- | ------------------- | ------------------- | ------------------- | -------------------- |
-|5|13|11|10|10|10| 10.8 |
-|15|12|15|10|11|11| 11.8 |
-|30|13|11|13|16|12| 13 |
-|60|15|14|11|11|13| 12.8 |  
+|       5 |                  13 |                  11 |                  10 |                  10 |                  10 |                 10.8 |
+|      15 |                  12 |                  15 |                  10 |                  11 |                  11 |                 11.8 |
+|      30 |                  13 |                  11 |                  13 |                  16 |                  12 |                   13 |
+|      60 |                  15 |                  14 |                  11 |                  11 |                  13 |                 12.8 |  
 
 What to add next:
 * Random transaction selection when creating blocks (will be uncommitted to the release as teh update is not significant)
+* More testing data. I could test parallel data, longer mining etc.
 
 ## V0.1
 
