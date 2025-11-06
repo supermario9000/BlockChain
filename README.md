@@ -4,7 +4,7 @@
 
 1. Paste "g++ -std=c++17 -I src/headers src/functions/*.cpp main.cpp -O2 -Wall -Wextra -o BlockChain.exe" in the project root terminal.  
 2. Open BlockChain.exe or use "./BlockChain.exe".  
-3. By typing numbers 0-4, you can navigate the menu and use the program.  
+3. By typing numbers 0-5, you can navigate the menu and use the program.  
 4. Enjoy :).
 
 ## Where did I use AI help
