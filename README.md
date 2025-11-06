@@ -4,7 +4,7 @@
 
 1. Paste "g++ -std=c++17 -I src/headers src/functions/*.cpp main.cpp -O2 -Wall -Wextra -o BlockChain.exe" in the project root terminal.  
 2. Open BlockChain.exe or use "./BlockChain.exe".  
-3. By typing numbers 0-4, you can navigate the menu and use the program.  
+3. By typing numbers 0-5, you can navigate the menu and use the program.  
 4. Enjoy :).
 
 ## Where did I use AI help
@@ -23,7 +23,7 @@ This changes when using the parallel mining functions, as the second miner tries
 
 ## V0.2  
 
-Release link:
+Release link: https://github.com/supermario9000/BlockChain/releases/tag/blockchain_v0.2  
 This release comes with these features:
 * Parallel mining simulation;
 * Validation of transactions and balances;
@@ -42,10 +42,14 @@ By default, the mining function miner runs through the nonce in sequence.
 
 | time, s | try 1, blocks mined | try 2, blocks mined | try 3, blocks mined | try 4, blocks mined | try 5, blocks mined | Average blocks mined |
 | ------- | ------------------- | ------------------- | ------------------- | ------------------- | ------------------- | -------------------- |
-|5|13|11|10|10|10| 10.8 |
-|15|12|15|10|11|11| 11.8 |
-|30|13|11|13|16|12| 13 |
-|60|15|14|11|11|13| 12.8 |
+|       5 |                  13 |                  11 |                  10 |                  10 |                  10 |                 10.8 |
+|      15 |                  12 |                  15 |                  10 |                  11 |                  11 |                 11.8 |
+|      30 |                  13 |                  11 |                  13 |                  16 |                  12 |                   13 |
+|      60 |                  15 |                  14 |                  11 |                  11 |                  13 |                 12.8 |  
+
+What to add next:
+* Random transaction selection when creating blocks (will be uncommitted to the release as teh update is not significant)
+* More testing data. I could test parallel data, longer mining etc.
 
 ## V0.1
 
