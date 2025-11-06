@@ -11,6 +11,8 @@
 
 ## V0.1
 
+Release link: 
+https://github.com/supermario9000/BlockChain/releases/tag/blockchain_v0.1  
 This release comes with these features:  
 
 * A functional blockchain simulation, which includes:
