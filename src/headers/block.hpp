@@ -15,6 +15,7 @@ class Block {
         int difficultyTarget;
         long timestamp;
         int nonce;
+        bool mined = false;
         //body
         vector<Transaction> transactions; //a vector of transactions. This would make it easier to manipulate blocks
 

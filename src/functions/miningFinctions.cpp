@@ -3,9 +3,12 @@
 
 const int requiredTxAmount = 100;
 
-int getDifficultyForBlock(size_t blockIndex) {
-	const int baseDifficulty = 3;
-	return baseDifficulty + static_cast<int>(blockIndex / 10); //blocks become more difficult every 10th mined
+int getDifficultyForBlock(const vector<Block>& blocks) {
+    const int baseDifficulty = 3;
+    // count only blocks that were actually mined by miner (ignore simulated blocks)
+    size_t minedCount = 0;
+    for (const auto &b : blocks) if (b.mined) ++minedCount;
+    return baseDifficulty + static_cast<int>(minedCount / 10);
 }
 
 // Mine a single block from the front of the mempool and append it to the chain.
@@ -26,12 +29,12 @@ bool mineBlocks(vector<Block>& blocks, vector<Transaction>& mempool, const std::
     newBlock.setPreviousHash(blocks.empty() ? "" : blocks.back().getBlockHash());
     newBlock.setMerkleRoot(calculateMerkleRoot(newBlock.transactions));
     newBlock.setVersion("1.0");
-    newBlock.setDifficultyTarget(getDifficultyForBlock(blocks.size()));
+    newBlock.setDifficultyTarget(getDifficultyForBlock(blocks));
     newBlock.setTimestamp(std::time(0));
     newBlock.setNonce(0);
 
     // mining loop (interruptible)
-    int difficulty = getDifficultyForBlock(blocks.size());
+    int difficulty = getDifficultyForBlock(blocks);
     string targetPrefix(difficulty, '0');
     long nonce = 0;
     string hash;
@@ -50,6 +53,7 @@ bool mineBlocks(vector<Block>& blocks, vector<Transaction>& mempool, const std::
     }
 
     // append to chain
+    newBlock.mined = true;
     blocks.push_back(newBlock);
     // remove used transactions from mempool
     mempool.erase(mempool.begin(), mempool.begin() + static_cast<ptrdiff_t>(take));
