@@ -48,7 +48,7 @@ By default, the mining function miner runs through the nonce in sequence.
 |      60 |                  15 |                  14 |                  11 |                  11 |                  13 |                 12.8 |  
 
 What to add next:
-* Random transaction selection when creating blocks (will be uncommitted to the release as teh update is not significant)
+* Random transaction selection (added in a commit separate from the release)
 * More testing data. I could test parallel data, longer mining etc.
 
 ## V0.1
