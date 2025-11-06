@@ -30,14 +30,28 @@ void generateUserData(vector<User>& users, int numUsers) {
 }
 
 void generateTransactionData(const vector<User>& users, vector<Transaction>& transactions, int numTransactions) {
+    const double max_amount = 1000.0; // For simulation, max transaction amount
     for (int i = 0; i < numTransactions; ++i) {
-        string tx_id = generateTransactionID();
-        string sender_key, receiver_key;
-        selectTransactionParticipants(users, sender_key, receiver_key);
-        double max_amount = 1000.0; // For simulation, max transaction amount
-        double amount = generateTransactionAmount(max_amount);
-        Transaction newTx(tx_id, sender_key, receiver_key, amount);
-        transactions.push_back(newTx);
+        bool created = false;
+        // try a few times to create a valid (unique id + sufficient funds) transaction
+        for (int attempt = 0; attempt < 10 && !created; ++attempt) {
+            string tx_id = generateTransactionID();
+            if (transactionIdExists(transactions, tx_id)) continue; // avoid duplicates
+
+            string sender_key, receiver_key;
+            selectTransactionParticipants(users, sender_key, receiver_key);
+            double amount = generateTransactionAmount(max_amount);
+
+            if (!hasSufficientBalance(users, sender_key, amount)) {
+                // try a different amount or participants on next attempt
+                continue;
+            }
+
+            Transaction newTx(tx_id, sender_key, receiver_key, amount);
+            transactions.push_back(newTx);
+            created = true;
+        }
+        // if not created after attempts, skip this tx (keeps generation moving)
     }
 }
 
@@ -57,7 +71,7 @@ void generateBlockData(const vector<Transaction>& transactions, vector<Block>& b
             string sender = tx.getSenderKey();
             string receiver = tx.getReceiverKey();
             // find sender
-            auto s_it = std::find_if(users.begin(), users.end(), [&](const User &u){ return u.getPublicKey() == sender; });
+            auto s_it = find_if(users.begin(), users.end(), [&](const User &u){ return u.getPublicKey() == sender; });
             if (s_it != users.end()) {
                 bool spent = s_it->spendUTXO(amt);
                 if (!spent) {
@@ -65,7 +79,7 @@ void generateBlockData(const vector<Transaction>& transactions, vector<Block>& b
                 }
             }
             // find receiver and credit
-            auto r_it = std::find_if(users.begin(), users.end(), [&](const User &u){ return u.getPublicKey() == receiver; });
+            auto r_it = find_if(users.begin(), users.end(), [&](const User &u){ return u.getPublicKey() == receiver; });
             if (r_it != users.end()) {
                 r_it->addUTXO(amt);
             }
@@ -75,14 +89,14 @@ void generateBlockData(const vector<Transaction>& transactions, vector<Block>& b
         newBlock.setMerkleRoot(calculateMerkleRoot(newBlock.transactions));
         newBlock.setVersion("1.0");
         newBlock.setDifficultyTarget(0); // example difficulty
-        newBlock.setTimestamp(std::time(0));
+        newBlock.setTimestamp(time(0));
         newBlock.setNonce(0); // to be set during mining
         blocks.push_back(newBlock);
         // update progress bar
         printProgressBar(i + 1, totalBlocks);
     }
     // finish line
-    std::cout << std::endl;
+    cout << endl;
 }
 
 string calculateMerkleRoot(const vector<Transaction>& transactions) {
@@ -113,7 +127,7 @@ string calculateMerkleRoot(const vector<Transaction>& transactions) {
     return layer.front();
 }
 
-/* needed only for testing
+/*
 // CSV escaping: double internal quotes and wrap fields containing comma, quote or newline in quotes
 static string csvEscape(const string &s) {
     bool needQuotes = false;
@@ -174,4 +188,3 @@ void writeTransactionsCsv(const vector<Transaction>& transactions, const string&
     out.close();
 }
 */
-

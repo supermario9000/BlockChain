@@ -23,13 +23,18 @@ void generateBlockData(const vector<class Transaction>& transactions, vector<cla
 
 // mining helpers
 // Mine a single block before the provided deadline. Returns true if a block was mined and appended.
-bool mineBlocks(vector<class Block>& blocks, vector<class Transaction>& mempool, const std::chrono::steady_clock::time_point &deadline);
+// Mine a single block before the provided deadline. Returns true if a block was mined and appended.
+// Note: mining now requires access to the users vector so UTXOs can be updated atomically on success.
+bool mineBlocks(vector<class Block>& blocks, vector<class Transaction>& mempool, vector<class User>& users, const std::chrono::steady_clock::time_point &deadline);
 // difficulty helper: compute difficulty based on already-mined blocks (ignores simulated blocks)
 int getDifficultyForBlock(const vector<class Block>& blocks);
 string calculateMerkleRoot(const vector<class Transaction>& transactions);//also a generation function helper
+// input checks
+bool hasSufficientBalance(const vector<class User>& users, const string &public_key, double amount);
+bool transactionIdExists(const vector<class Transaction>& transactions, const string &tx_id);
 
 // CSV output helpers
-void writeUsersCsv(const vector<class User>& users, const string& filename);
-void writeTransactionsCsv(const vector<class Transaction>& transactions, const string& filename);
+//void writeUsersCsv(const vector<class User>& users, const string& filename);
+//void writeTransactionsCsv(const vector<class Transaction>& transactions, const string& filename);
 
 #endif // HELPERFUNCTIONPROTOTYPES_HPP

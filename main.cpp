@@ -149,7 +149,7 @@ int main() {
                     int mined_count = 0;
                     // keep mining one block at a time until deadline or mempool empty
                     while (clock::now() < deadline && !transactions.empty()) {
-                        bool mined = mineBlocks(blocks, transactions, deadline);
+                        bool mined = mineBlocks(blocks, transactions, users, deadline);
                         if (!mined) break; // time expired during mining or nothing to mine
                         ++mined_count;
                     }
