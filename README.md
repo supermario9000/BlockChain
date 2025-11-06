@@ -7,7 +7,45 @@
 3. By typing numbers 0-4, you can navigate the menu and use the program.  
 4. Enjoy :).
 
+## Where did I use AI help
+
+Ai helped me mostly with the parallel miner function.  
+In other areas, i tried to solve everything on my own, slightly consulting AI when something was not clear.  
+
+## Basic mining logic  
+
+When mining, the difficulty is increasing each time 10 new blocks are mined. This makes the algorythm more interesting.  
+Currently, the difficulty is set to 3 to mine blocks faster and have more fun with the program.  
+The default miner checks through nonce in sequence from 1 to infinity (or a set max value).  
+This changes when using the parallel mining functions, as the second miner tries to guess the nonce randomly.  
+
 # Release notes  
+
+## V0.2  
+
+Release link:
+This release comes with these features:
+* Parallel mining simulation;
+* Validation of transactions and balances;
+* Menu update.  
+
+__Parallel mining process:__
+The parallel mining function outsources mining to two threads.  
+What is important, is that the __1st miner tries nonces in sequence__ (e.g. 1,2...,10001,10002...), while the __2nd miner selects nonces randomly__.  
+This makes the results more diverse.  
+All results get outputted to miner_1.csv and miner_2.csv for analysis. They don't get saved in program state, so programmatic exploration is impossible.  
+
+# Mining tests
+
+The first test was run each time generating user and transaction data anew.  
+By default, the mining function miner runs through the nonce in sequence.  
+
+| time, s | try 1, blocks mined | try 2, blocks mined | try 3, blocks mined | try 4, blocks mined | try 5, blocks mined | Average blocks mined |
+| ------- | ------------------- | ------------------- | ------------------- | ------------------- | ------------------- | -------------------- |
+|5|13|11|10|10|10| 10.8 |
+|15|12|15|10|11|11| 11.8 |
+|30|13|11|13|16|12| 13 |
+|60|15|14|11|11|13| 12.8 |
 
 ## V0.1
 
