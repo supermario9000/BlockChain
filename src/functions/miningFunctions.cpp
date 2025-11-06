@@ -24,7 +24,16 @@ bool mineBlocks(vector<Block>& blocks, vector<Transaction>& mempool, vector<User
     vector<Transaction> includedTxs;
     vector<char> usedFlag(mempool.size(), 0);
 
-    for (size_t i = 0; i < mempool.size() && includedTxs.size() < static_cast<size_t>(requiredTxAmount); ++i) {
+    // Build an index list and shuffle for random transaction selection (always random now)
+    vector<size_t> indices(mempool.size());
+    for (size_t i = 0; i < indices.size(); ++i) indices[i] = i;
+    if (!indices.empty()) {
+        std::mt19937_64 rngIdx(static_cast<unsigned long long>(std::chrono::steady_clock::now().time_since_epoch().count()) ^ static_cast<unsigned long long>(std::hash<std::thread::id>()(std::this_thread::get_id())));
+        std::shuffle(indices.begin(), indices.end(), rngIdx);
+    }
+
+    for (size_t pos = 0; pos < indices.size() && includedTxs.size() < static_cast<size_t>(requiredTxAmount); ++pos) {
+        size_t i = indices[pos];
         const Transaction &tx = mempool[i];
         auto s_it = std::find_if(temp_users.begin(), temp_users.end(), [&](const User &u){ return u.getPublicKey() == tx.getSenderKey(); });
         if (s_it == temp_users.end()) continue; // unknown sender
@@ -92,8 +101,7 @@ bool mineBlocks(vector<Block>& blocks, vector<Transaction>& mempool, vector<User
 }
 
 // Run two miners in parallel on independent copies of the provided state for a fixed duration.
-// Miner1 uses sequential nonces, miner2 uses random nonces. The function returns 1, 2 or 0 for
-// no clear winner (difference < winThreshold).
+// Miner1 uses sequential nonces, miner2 uses random nonces.
 int parallelMiningCompetition(const vector<Block>& blocksInit, const vector<Transaction>& mempoolInit, const vector<User>& usersInit, int durationSeconds, int winThreshold) {
     using clock = std::chrono::steady_clock;
     const auto start = clock::now();
