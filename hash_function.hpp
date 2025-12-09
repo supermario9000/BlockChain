@@ -1,8 +1,21 @@
 #ifndef HASH_FUNCTION_HPP
 #define HASH_FUNCTION_HPP
 
-#include "lib.hpp"
-#include <mutex>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <iomanip>
+#include <random>
+#include <mutex> // to read the mp3 file only once
+
+using std::string;
+using std::vector;
+using std::ifstream;
+using std::ios;
+using std::cout;
+using std::endl;
 
 //prototypes of helper functions used in the hash function
 inline string desimtaine_i_16(int desimtaine);
