@@ -2,7 +2,7 @@
 
 ## Description ##
 
-This is my version of a hash function.  
+This is my version of a hash function. The release link: https://github.com/supermario9000/BlockChain/releases/tag/hash_v1 .  
 It must always be paired with an audio file to work correctly. The audio file should be in a parent directory (or you may configure it in the source code).  
 All of the helper functions are included in the header and are ready to use.  
 
