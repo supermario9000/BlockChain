@@ -1,5 +1,5 @@
 # BlockChain
-Programming associated with blockchain technology.
+Programming associated with hashing, blockchain and smart contracts.
 Currently all projects (which are in different branches) are made for the blockchain technology course.
 
 ## Links to projects' source code:
