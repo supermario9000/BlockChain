@@ -14,7 +14,6 @@ export default function App() {
   const [fulfillmentEth, setFulfillmentEth] = useState('0.001')
   const [shipmentEth, setShipmentEth] = useState('0.001')
   const [invoiceUri, setInvoiceUri] = useState('ipfs://Qm...')
-  const [tracking, setTracking] = useState('')
   const [order, setOrder] = useState(null)
   const [statusMsg, setStatusMsg] = useState('')
   const [deploying, setDeploying] = useState(false)
@@ -192,13 +191,6 @@ export default function App() {
     await tx.wait(); setStatusMsg('Closed and payouts sent.')
   }
 
-  async function handleSetTracking() {
-    if (!contract) return
-    const tx = await contract.setTracking(BigInt(orderId), tracking)
-    setStatusMsg('Setting tracking...')
-    await tx.wait(); setStatusMsg('Tracking set.')
-  }
-
   async function handleLoadOrder() {
     if (!contract) return
     const o = await contract.orders(BigInt(orderId))
@@ -295,15 +287,8 @@ export default function App() {
         </div>
 
         <div style={{ border:'1px solid #eee', padding:12, borderRadius:8 }}>
-          <h4>Tracking / Inspect</h4>
+          <h4>Inspect Order</h4>
           <div>
-            <label>Tracking:&nbsp;</label>
-            <input value={tracking} onChange={e=>setTracking(e.target.value)} style={{ width: 200 }} />
-          </div>
-          <div style={{ marginTop: 8 }}>
-            <button onClick={handleSetTracking} disabled={!contract}>Set Tracking</button>
-          </div>
-          <div style={{ marginTop: 8 }}>
             <button onClick={handleLoadOrder} disabled={!contract}>Load Order</button>
           </div>
           {order && (
@@ -312,7 +297,6 @@ export default function App() {
               <div>FulfillmentFee (wei): {order.fulfillmentFee}</div>
               <div>ShipmentFee (wei): {order.shipmentFee}</div>
               <div>Paid (wei): {order.paid}</div>
-              <div>Tracking: {order.tracking || '-'}</div>
               <div>Invoice: {order.invoiceUri || '-'}</div>
             </div>
           )}
