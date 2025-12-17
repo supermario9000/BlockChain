@@ -1,1 +1,9 @@
-node_modules
+node_modules/
+.env
+
+# Build output
+build/
+
+# OS/Editor files
+.DS_Store
+*.log

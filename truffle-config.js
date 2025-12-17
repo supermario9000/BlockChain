@@ -41,10 +41,19 @@
  * https://trufflesuite.com/docs/truffle/getting-started/using-the-truffle-dashboard/
  */
 
-// require('dotenv').config();
-// const { MNEMONIC, PROJECT_ID } = process.env;
+require('dotenv').config();
+let { PRIVATE_KEY, PRIVATE_KEYS, SEPOLIA_RPC_URL } = process.env;
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
+// Normalize private key to include 0x prefix if missing
+if (PRIVATE_KEY && !PRIVATE_KEY.startsWith("0x")) PRIVATE_KEY = "0x" + PRIVATE_KEY;
+if (PRIVATE_KEYS) {
+  PRIVATE_KEYS = PRIVATE_KEYS.split(',')
+    .map(k => k.trim())
+    .filter(Boolean)
+    .map(k => (k.startsWith('0x') ? k : '0x' + k));
+}
+
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 module.exports = {
   /**
@@ -63,6 +72,28 @@ module.exports = {
       host: "127.0.0.1",
       port: 8545,
       network_id: "*",
+    },
+
+    // Sepolia testnet configuration
+    // Requires: PRIVATE_KEY and SEPOLIA_RPC_URL in .env file
+    // Get testnet ETH from faucet: https://www.infura.io/faucet/sepolia
+    // Run: truffle test --network sepolia
+    sepolia: {
+      // Supports either a single PRIVATE_KEY or comma-separated PRIVATE_KEYS
+      provider: () => {
+        const keys = Array.isArray(PRIVATE_KEYS) && PRIVATE_KEYS.length > 0
+          ? PRIVATE_KEYS
+          : (PRIVATE_KEY ? [PRIVATE_KEY] : []);
+        if (!SEPOLIA_RPC_URL) throw new Error('SEPOLIA_RPC_URL missing. Set it in .env');
+        if (!keys.length) throw new Error('No private keys provided. Set PRIVATE_KEY or PRIVATE_KEYS in .env');
+        return new HDWalletProvider(keys, SEPOLIA_RPC_URL);
+      },
+      network_id: 11155111,       // Sepolia chain ID
+      gas: 5500000,               // Gas limit per transaction
+      gasPrice: 20000000000,      // 20 gwei (adjust if too expensive)
+      confirmations: 2,           // Wait 2 blocks after deployment
+      timeoutBlocks: 200,         // Timeout after 200 blocks
+      skipDryRun: true,           // Skip dry run for public nets
     },
 
     // An additional network, but with some advanced options…
