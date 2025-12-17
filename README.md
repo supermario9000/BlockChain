@@ -42,3 +42,17 @@ A step by step explanation:
 12. The status is updated to the client, and the client receives a stock decrease report from the 3PL logistics WMS.
 
 I hope everything is understandable up to this point.
+
+# Tests and deployment
+
+## Localhost testing
+As I was not sure of what tests i should perform, i did a simple full business model loop test check.  
+After troubleshooting for a while, everything returned the right statuses and worked correctly.  
+The picture below shows what functions of the loop I was checking and their return times.  
+<img width="558" height="515" alt="image" src="https://github.com/user-attachments/assets/357edf2e-27e8-4c6a-99b6-fd56f2033564" />  
+
+Testing was done using ganache-cli, which created a local ethereum network.  
+That means that each transaction occurs on different blocks, which leads to very sharp performance and usually this test only takes 5 seconds.  
+
+## Sepolia testing (testing in a net-wide sandbox environment)
+For this section i performed the same tests.  
