@@ -23,7 +23,7 @@ It is similar to the example model (https://medium.com/coinmonks/build-a-smart-c
 Below you will find an image which shows the sequence diagram of my business model and a step-by step explanation of all elements.  
 
 The picture shows 4 parties: the 3PL logistics company, the customer, the smart contract and the courier.  
-Each parties cam and usually do have their own system, so even events and conversations not between the smart contract and the subject are shown.  
+Each parties can and usually do have their own system, so even events and conversations not between the smart contract and the subject are shown.  
 
 <img width="600" height="920" alt="Untitled Diagram drawio (1)" src="https://github.com/user-attachments/assets/5762b111-d69a-4377-9d2b-57e3656d931c" />
 
