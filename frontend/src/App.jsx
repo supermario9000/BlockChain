@@ -5,12 +5,15 @@ import { CONTRACT_BYTECODE, CONTRACT_ABI } from './abi/OrderFulfillmentArtifact'
 
 const STORAGE_KEY = 'order-fulfillment-address'
 
+const getOrderIdStorageKey = (address) => `order-id-${address}`
+
 export default function App() {
   const [provider, setProvider] = useState(null)
   const [signer, setSigner] = useState(null)
   const [account, setAccount] = useState('')
   const [contractAddress, setContractAddress] = useState(localStorage.getItem(STORAGE_KEY) || '')
   const [orderId, setOrderId] = useState('0')
+  const [maxOrderId, setMaxOrderId] = useState('0')
   const [fulfillmentEth, setFulfillmentEth] = useState('0.001')
   const [shipmentEth, setShipmentEth] = useState('0.001')
   const [invoiceUri, setInvoiceUri] = useState('ipfs://Qm...')
@@ -23,9 +26,59 @@ export default function App() {
     return new ethers.Contract(contractAddress, abi, signer)
   }, [signer, contractAddress])
 
+  // When contract address changes, load the associated orderId
   useEffect(() => {
-    if (contractAddress) localStorage.setItem(STORAGE_KEY, contractAddress)
-  }, [contractAddress])
+    if (contractAddress && ethers.isAddress(contractAddress)) {
+      localStorage.setItem(STORAGE_KEY, contractAddress)
+      
+      // Check if we have a saved order ID for this contract
+      const savedOrderId = localStorage.getItem(getOrderIdStorageKey(contractAddress))
+      setOrderId(savedOrderId || '0')
+      
+      // Try to fetch the max order ID (nextOrderId - 1)
+      if (contract) {
+        contract.nextOrderId().then(nextId => {
+          const maxId = (BigInt(nextId) - 1n).toString()
+          setMaxOrderId(maxId)
+        }).catch(() => {
+          setMaxOrderId('0')
+        })
+      } else {
+        setMaxOrderId('0')
+      }
+      
+      setOrder(null) // Clear order data when switching contracts
+    }
+  }, [contractAddress, contract])
+
+  // Save orderId whenever it changes
+  useEffect(() => {
+    if (contractAddress && ethers.isAddress(contractAddress)) {
+      localStorage.setItem(getOrderIdStorageKey(contractAddress), orderId)
+    }
+  }, [orderId, contractAddress])
+
+  // Auto-load order whenever orderId or contract changes
+  useEffect(() => {
+    async function loadOrder() {
+      if (!contract || orderId === null || orderId === '0') return
+      try {
+        const o = await contract.orders(BigInt(orderId))
+        setOrder({
+          status: Number(o.status),
+          fulfillmentFee: o.fulfillmentFee.toString(),
+          shipmentFee: o.shipmentFee.toString(),
+          paid: o.paid.toString(),
+          invoiceUri: o.invoiceUri,
+        })
+      } catch (err) {
+        // Order doesn't exist yet, clear order display
+        console.log('Order not found:', err.message)
+        setOrder(null)
+      }
+    }
+    loadOrder()
+  }, [contract, orderId])
 
   async function connect() {
     if (!window.ethereum) {
@@ -38,6 +91,20 @@ export default function App() {
     setProvider(p)
     setSigner(s)
     setAccount(await s.getAddress())
+  }
+
+  async function handlePreviousOrder() {
+    if (BigInt(orderId) > 0n) {
+      const newId = (BigInt(orderId) - 1n).toString()
+      setOrderId(newId)
+    }
+  }
+
+  async function handleNextOrder() {
+    if (BigInt(orderId) < BigInt(maxOrderId)) {
+      const newId = (BigInt(orderId) + 1n).toString()
+      setOrderId(newId)
+    }
   }
 
   async function handleDeployContract() {
@@ -137,8 +204,15 @@ export default function App() {
     const rc = await tx.wait()
     const ev = rc.logs.map(l => contract.interface.parseLog(l)).find(e => e && e.name === 'OrderCreated')
     if (ev) {
-      setOrderId(ev.args.orderId.toString())
-      setStatusMsg(`Order created with ID ${ev.args.orderId}`)
+      const newOrderId = ev.args.orderId.toString()
+      setOrderId(newOrderId)
+      setStatusMsg(`Order created with ID ${newOrderId}`)
+      
+      // Update maxOrderId to the newly created order ID
+      setMaxOrderId(newOrderId)
+      
+      // Pass the new order ID directly to load the new order's data
+      await handleLoadOrder(newOrderId)
     } else {
       setStatusMsg('Order created (event not parsed). Check Etherscan.')
     }
@@ -150,21 +224,27 @@ export default function App() {
     const s = ethers.parseEther(shipmentEth)
     const tx = await contract.setPrice(BigInt(orderId), f, s)
     setStatusMsg('Setting price...')
-    await tx.wait(); setStatusMsg('Price set.')
+    await tx.wait()
+    setStatusMsg('Price set.')
+    await handleLoadOrder()
   }
 
   async function handleMarkProcessing() {
     if (!contract) return
     const tx = await contract.markProcessing(BigInt(orderId))
     setStatusMsg('Marking processing...')
-    await tx.wait(); setStatusMsg('Order marked as Processing.')
+    await tx.wait()
+    setStatusMsg('Order marked as Processing.')
+    await handleLoadOrder()
   }
 
   async function handleRequestPayment() {
     if (!contract) return
     const tx = await contract.requestPayment(BigInt(orderId))
     setStatusMsg('Requesting payment...')
-    await tx.wait(); setStatusMsg('Order set to AwaitingPayment.')
+    await tx.wait()
+    setStatusMsg('Order set to AwaitingPayment.')
+    await handleLoadOrder()
   }
 
   async function handlePay() {
@@ -174,34 +254,55 @@ export default function App() {
     const due = (o.fulfillmentFee + o.shipmentFee)
     const tx = await contract.pay(BigInt(orderId), { value: due })
     setStatusMsg('Paying...')
-    await tx.wait(); setStatusMsg('Paid.')
+    await tx.wait()
+    setStatusMsg('Paid.')
+    await handleLoadOrder()
   }
 
   async function handleUploadInvoice() {
     if (!contract) return
-    const tx = await contract.uploadInvoice(BigInt(orderId), invoiceUri)
-    setStatusMsg('Uploading invoice...')
-    await tx.wait(); setStatusMsg('Invoice uploaded.')
+    try {
+      const tx = await contract.uploadInvoice(BigInt(orderId), invoiceUri)
+      setStatusMsg('Uploading invoice...')
+      await tx.wait()
+      setStatusMsg('Invoice uploaded. Closing and paying out...')
+      
+      // Automatically close and payout after invoice upload
+      const closeTx = await contract.closeAndPayout(BigInt(orderId))
+      await closeTx.wait()
+      setStatusMsg('✅ Order closed and payouts sent.')
+      
+      // Refresh order data
+      await handleLoadOrder()
+    } catch (err) {
+      setStatusMsg(`❌ Error: ${err.message}`)
+    }
   }
 
   async function handleClose() {
     if (!contract) return
     const tx = await contract.closeAndPayout(BigInt(orderId))
     setStatusMsg('Closing and paying out...')
-    await tx.wait(); setStatusMsg('Closed and payouts sent.')
+    await tx.wait()
+    setStatusMsg('Closed and payouts sent.')
+    await handleLoadOrder()
   }
 
-  async function handleLoadOrder() {
-    if (!contract) return
-    const o = await contract.orders(BigInt(orderId))
-    setOrder({
-      status: Number(o.status),
-      fulfillmentFee: o.fulfillmentFee.toString(),
-      shipmentFee: o.shipmentFee.toString(),
-      paid: o.paid.toString(),
-      tracking: o.tracking,
-      invoiceUri: o.invoiceUri,
-    })
+  async function handleLoadOrder(queryOrderId = orderId) {
+    if (!contract || queryOrderId === null) return
+    try {
+      const o = await contract.orders(BigInt(queryOrderId))
+      setOrder({
+        status: Number(o.status),
+        fulfillmentFee: o.fulfillmentFee.toString(),
+        shipmentFee: o.shipmentFee.toString(),
+        paid: o.paid.toString(),
+        invoiceUri: o.invoiceUri,
+      })
+    } catch (err) {
+      console.log('Error loading order:', err.message)
+      setOrder(null)
+    }
   }
 
   const statusLabels = ['Registered','Priced','Processing','AwaitingPayment','Paid','Invoiced','Closed','Cancelled']
@@ -244,7 +345,27 @@ export default function App() {
           </div>
           <div style={{ marginTop: 8 }}>
             <label>Order ID:&nbsp;</label>
-            <input value={orderId} onChange={e=>setOrderId(e.target.value)} style={{ width: 120 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {BigInt(maxOrderId) >= 2n && (
+                <button 
+                  onClick={handlePreviousOrder}
+                  disabled={BigInt(orderId) === 0n}
+                  style={{ padding: '4px 8px', cursor: BigInt(orderId) === 0n ? 'not-allowed' : 'pointer' }}
+                >
+                  ←
+                </button>
+              )}
+              <span style={{ fontWeight: 'bold', minWidth: '30px' }}>{orderId}</span>
+              {BigInt(maxOrderId) >= 2n && (
+                <button 
+                  onClick={handleNextOrder}
+                  disabled={BigInt(orderId) >= BigInt(maxOrderId)}
+                  style={{ padding: '4px 8px', cursor: BigInt(orderId) >= BigInt(maxOrderId) ? 'not-allowed' : 'pointer' }}
+                >
+                  →
+                </button>
+              )}
+            </div>
           </div>
           <div style={{ marginTop: 8 }}>
             <label>Fulfillment (ETH):&nbsp;</label>
@@ -273,32 +394,37 @@ export default function App() {
         </div>
 
         <div style={{ border:'1px solid #eee', padding:12, borderRadius:8 }}>
-          <h4>Invoice / Close</h4>
+          <h4>Upload Invoice</h4>
           <div>
             <label>Invoice URI:&nbsp;</label>
             <input value={invoiceUri} onChange={e=>setInvoiceUri(e.target.value)} style={{ width: 300 }} />
           </div>
           <div style={{ marginTop: 8 }}>
-            <button onClick={handleUploadInvoice} disabled={!contract}>Upload Invoice</button>
+            <button onClick={handleUploadInvoice} disabled={!contract}>Upload Invoice & Close Order</button>
           </div>
-          <div style={{ marginTop: 8 }}>
-            <button onClick={handleClose} disabled={!contract}>Close & Payout</button>
-          </div>
+          <small style={{ color: '#666', display: 'block', marginTop: 8 }}>
+            Uploads invoice and automatically closes order with payouts
+          </small>
         </div>
 
         <div style={{ border:'1px solid #eee', padding:12, borderRadius:8 }}>
           <h4>Inspect Order</h4>
-          <div>
-            <button onClick={handleLoadOrder} disabled={!contract}>Load Order</button>
-          </div>
-          {order && (
-            <div style={{ marginTop: 8, fontFamily: 'monospace' }}>
-              <div>Status: {statusLabels[order.status] ?? order.status}</div>
+          {order ? (
+            <div style={{ 
+              fontFamily: 'monospace',
+              opacity: order.status === 6 ? 0.6 : 1,
+              backgroundColor: order.status === 6 ? '#f5f5f5' : 'transparent',
+              padding: order.status === 6 ? 8 : 0,
+              borderRadius: order.status === 6 ? 4 : 0
+            }}>
+              <div>Status: {statusLabels[order.status] ?? order.status}{order.status === 6 ? ' ✓' : ''}</div>
               <div>FulfillmentFee (wei): {order.fulfillmentFee}</div>
               <div>ShipmentFee (wei): {order.shipmentFee}</div>
               <div>Paid (wei): {order.paid}</div>
               <div>Invoice: {order.invoiceUri || '-'}</div>
             </div>
+          ) : (
+            <div style={{ color: '#999' }}>Create an order to see details here</div>
           )}
         </div>
       </section>
