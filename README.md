@@ -56,3 +56,32 @@ That means that each transaction occurs on different blocks, which leads to very
 
 ## Sepolia testing (testing in a net-wide sandbox environment)
 For this section i performed the same tests.  
+
+While deploying the sepolia environment I ran into a problem with the __sepolia Etherium balance__.  
+I tried to get some tokens from free faucets, however most of them also returned that I had insufficient balance.  
+These are the ones that didn't work (require mainnet balance or are hard to access):
+  * Alchemy faucet   https://www.alchemy.com/faucets/ethereum-sepolia
+  * Infura faucet    https://www.infura.io/faucet/sepolia
+  * Quicknode faucet https://faucet.quicknode.com/ethereum/sepolia
+  * Chainlink faucet https://faucets.chain.link/sepolia
+
+These are the ones that should work:
+  * Triangle faucet (worked for me) gives 0.001 sepETH: https://faucet.triangleplatform.com/ethereum/sepolia
+  * Google faucet gives 0.005 sepETH  https://cloud.google.com/application/web3/faucet/ethereum/sepolia
+  * PoW faucet (requires you to mine the tokens, a large amount available) minimal redeem amount: 0.05 sepETH. https://sepolia-faucet.pk910.de/#/mine/a4674129-e4ad-44fe-9a71-b27aad362162
+ 
+In my case, I needed to get 0.11 sepolia eth tokens. This means only triangle wasn't enough, I used PoW to finish.  
+
+When I had enough balance, my smart contract was deployed and verified by two blocks.  
+<img width="856" height="610" alt="image" src="https://github.com/user-attachments/assets/be379170-e66c-48cd-b1ad-7668f8439758" />
+
+Then I proceeded to manually test each step of my smart contract workflow. Images of these tests are below, scaled for formatting:  
+|Operation|Result Image|
+|---------|------------|
+| Create order | <img width="105" height="87" alt="image" src="https://github.com/user-attachments/assets/57e13512-6c0c-4c5b-a7f6-b9e846bd3081" /> |
+| Set prices | <img width="122" height="88" alt="image" src="https://github.com/user-attachments/assets/cec6078c-ff62-4b05-b1b4-4133980c1136" /> |
+| Mark order as "processing" | <img width="122" height="66" alt="image" src="https://github.com/user-attachments/assets/e2b8cfbf-a119-4106-be8f-5c1fd03c3cc6" /> |
+| Request payment from client | <img width="122" height="66" alt="image" src="https://github.com/user-attachments/assets/11480370-00aa-40e6-8a79-4bc9b57f7172" /> |
+| Client makes payment (same account in my case)| <img width="122" height="85" alt="image" src="https://github.com/user-attachments/assets/c52b0426-66b5-431a-9c92-fb408185e3b7" /> |
+| Upload Invoice | <img width="122" height="84" alt="image" src="https://github.com/user-attachments/assets/7ec16d8d-3447-4533-bdfa-53e56fc90cde" /> |
+| Close order and payout | <img width="122" height="88" alt="image" src="https://github.com/user-attachments/assets/6f08818a-3a83-4fa4-819e-c740e0f0b184" /> |
