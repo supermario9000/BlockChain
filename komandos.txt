@@ -1,0 +1,6 @@
+
+LOKALIOS:
+sukompiliuoti:
+npx truffle compile
+paleisti testus:
+npx truffle test --network development
