@@ -85,3 +85,15 @@ Then I proceeded to manually test each step of my smart contract workflow. Image
 | Client makes payment (same account in my case)| <img width="122" height="85" alt="image" src="https://github.com/user-attachments/assets/c52b0426-66b5-431a-9c92-fb408185e3b7" /> |
 | Upload Invoice | <img width="122" height="84" alt="image" src="https://github.com/user-attachments/assets/7ec16d8d-3447-4533-bdfa-53e56fc90cde" /> |
 | Close order and payout | <img width="122" height="88" alt="image" src="https://github.com/user-attachments/assets/6f08818a-3a83-4fa4-819e-c740e0f0b184" /> |
+
+#Sepolia transaction log analysis on Etherscan
+
+Logs can be viewed with this url:  
+https://sepolia.etherscan.io/tx/0x50f388a46a17319374485a014c3025b2ecad10d84f0346745382ec494270e1f3#eventlog  
+The transaction hash can be replaced with any completed transaction hash.
+
+Here are some examples of my transactions on Etherscan (main page and log page screenshots).  
+|Page|Set price|Mark order "processing"|Request payment|Client makes payment|Upload invoice|Close and payout|
+|----|---------|-----------------------|---------------|--------------------|--------------|----------------|
+|Main page|<img width="114" height="70" alt="Screenshot 2025-12-17 223637" src="https://github.com/user-attachments/assets/8a3e72e4-0bf0-4f73-b194-06c7cb8afdd1" />|<img width="114" height="67" alt="image" src="https://github.com/user-attachments/assets/0577e116-6585-4cd8-ac01-198d11d43b01" />|<img width="112" height="66" alt="image" src="https://github.com/user-attachments/assets/04a680b9-067f-4e46-ad31-e9f074ab5d84" />|<img width="112" height="66" alt="image" src="https://github.com/user-attachments/assets/e576a7a3-d68a-4020-ba41-93a4e5dd8ad3" />|<img width="112" height="66" alt="image" src="https://github.com/user-attachments/assets/7c48b6e3-5036-4f38-9b42-da9896d98d85" />|<img width="117" height="78" alt="image" src="https://github.com/user-attachments/assets/064dd1cc-3a56-422f-a1d5-d4c3c37d095c" />|
+|Log page|<img width="97" height="69" alt="Screenshot 2025-12-17 223722" src="https://github.com/user-attachments/assets/f4d5f011-a9dd-458b-bc1b-ee65984d032c" />|<img width="95" height="34" alt="image" src="https://github.com/user-attachments/assets/6b32066f-3f87-41d9-9474-ec1da380bbe9" />|<img width="95" height="32" alt="image" src="https://github.com/user-attachments/assets/0cd77a8c-d80c-44ec-b72b-8e7b58049b91" />|<img width="94" height="62" alt="image" src="https://github.com/user-attachments/assets/c5aa8962-bda8-4368-8fa0-f3a818130bbc" />|<img width="98" height="65" alt="image" src="https://github.com/user-attachments/assets/376b8043-b00e-4087-b750-4aa83581b212" />|<img width="98" height="60" alt="image" src="https://github.com/user-attachments/assets/008a1f25-5aa6-416f-8b3b-bd209423a2c2" />|
