@@ -51,18 +51,18 @@ export default function App() {
       setDeploying(true)
       setStatusMsg('Checking network...')
 
-      // Verify connected network is Sepolia (chain ID 11155111)
-      const network = await provider.getNetwork()
-      if (network.chainId !== 11155111n) {
-        setStatusMsg('Attempting to switch to Sepolia...')
+      // Get current network
+      let currentNetwork = await provider.getNetwork()
+      
+      // Switch to Sepolia if not already on it
+      if (currentNetwork.chainId !== 11155111n) {
+        setStatusMsg('Switching to Sepolia...')
         
-        // Try to switch to Sepolia
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: '0xaa36a7' }], // 11155111 in hex
           })
-          setStatusMsg('Switched to Sepolia! Deploying...')
         } catch (switchError) {
           // If switch fails, try adding the network
           if (switchError.code === 4902) {
@@ -76,22 +76,31 @@ export default function App() {
                 blockExplorerUrls: ['https://sepolia.etherscan.io'],
               }],
             })
-            setStatusMsg('Added Sepolia and switching... Deploying...')
           } else {
             throw new Error(`Please manually switch to Sepolia network in MetaMask`)
           }
         }
+        
+        // Wait a bit for MetaMask to process the switch
+        await new Promise(r => setTimeout(r, 1000))
+        
+        // Recreate provider and signer after network switch
+        const newProvider = new ethers.BrowserProvider(window.ethereum)
+        const newSigner = await newProvider.getSigner()
+        setProvider(newProvider)
+        setSigner(newSigner)
+        
+        setStatusMsg('Network switched to Sepolia!')
       }
 
       setStatusMsg('Deploying contract...')
 
-      // Contract constructor arguments
-      // Using connected account address for both client and courier
+      // Use fresh signer for deployment
       const deployerAddress = await signer.getAddress()
       const clientAddress = deployerAddress
       const courierAddress = deployerAddress
 
-      // Create contract factory
+      // Create contract factory with current signer
       const factory = new ethers.ContractFactory(
         CONTRACT_ABI,
         CONTRACT_BYTECODE,
@@ -99,12 +108,12 @@ export default function App() {
       )
 
       // Deploy contract
-      const contract = await factory.deploy(clientAddress, courierAddress)
-      console.log('Deployment tx hash:', contract.deploymentTransaction()?.hash)
+      const deployTx = await factory.deploy(clientAddress, courierAddress)
+      console.log('Deployment tx hash:', deployTx.deploymentTransaction()?.hash)
       setStatusMsg('Waiting for confirmation...')
 
       // Wait for deployment to complete
-      const deployedContract = await contract.waitForDeployment()
+      const deployedContract = await deployTx.waitForDeployment()
       const newContractAddress = await deployedContract.getAddress()
 
       console.log('Contract deployed at:', newContractAddress)
