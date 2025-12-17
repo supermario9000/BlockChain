@@ -17,6 +17,7 @@ Recreating the main flow in sepolia (commands one by one):
 npx truffle console --network sepolia
 
 const c = await OrderFulfillment.deployed();
+await c.createOrder()
 const me = (await web3.eth.getAccounts())[0];
 
 const balWei = await web3.eth.getBalance(me);
