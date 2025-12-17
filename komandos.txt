@@ -1,6 +1,18 @@
+Paleidimo eiga: 
+Pasileisti ganache su "ganache-cli --port 8545 --chainId 1337"
+Migruoti truffle į development network "truffle migrate --reset --n
+etwork development"
+Sukompiliuoti truffle
+Paleisti testus
 
 LOKALIOS:
 sukompiliuoti:
 npx truffle compile
 paleisti testus:
 npx truffle test --network development
+
+
+TO DO:
+
+front ende padaryti lauka, kuriame galima
+butu matyti visu prisijungusiu partiju dalyvius. Taip parodyti kokias prieigas kiekvienas turi.
