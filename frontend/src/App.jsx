@@ -97,6 +97,7 @@ export default function App() {
     if (BigInt(orderId) > 0n) {
       const newId = (BigInt(orderId) - 1n).toString()
       setOrderId(newId)
+      await handleLoadOrder(newId)
     }
   }
 
@@ -104,6 +105,7 @@ export default function App() {
     if (BigInt(orderId) < BigInt(maxOrderId)) {
       const newId = (BigInt(orderId) + 1n).toString()
       setOrderId(newId)
+      await handleLoadOrder(newId)
     }
   }
 
@@ -309,10 +311,14 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: 'Inter, system-ui, Arial', maxWidth: 900, margin: '24px auto', padding: 16 }}>
-      <h2>Order Fulfillment DApp</h2>
+      <h2>Order Fulfillment smart contract</h2>
 
       <section style={{ border: '1px solid #ddd', padding: 12, borderRadius: 8, marginBottom: 16 }}>
-        <button onClick={connect} disabled={!!account}>
+        <button 
+          onClick={connect} 
+          disabled={!!account}
+          style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '8px 16px', border: 'none', borderRadius: 4, cursor: account ? 'not-allowed' : 'pointer' }}
+        >
           {account ? `Connected: ${account.slice(0,6)}...${account.slice(-4)}` : 'Connect Wallet'}
         </button>
         <div style={{ marginTop: 8 }}>
@@ -341,26 +347,32 @@ export default function App() {
         <div style={{ border:'1px solid #eee', padding:12, borderRadius:8 }}>
           <h4>Create / Price</h4>
           <div>
-            <button onClick={handleCreateOrder} disabled={!contract}>Create Order</button>
+            <button 
+              onClick={handleCreateOrder} 
+              disabled={!contract}
+              style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '8px 16px', border: 'none', borderRadius: 4, cursor: !contract ? 'not-allowed' : 'pointer' }}
+            >
+              Create Order
+            </button>
           </div>
           <div style={{ marginTop: 8 }}>
             <label>Order ID:&nbsp;</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {BigInt(maxOrderId) >= 2n && (
+              {BigInt(maxOrderId) >= 1n && (
                 <button 
                   onClick={handlePreviousOrder}
                   disabled={BigInt(orderId) === 0n}
-                  style={{ padding: '4px 8px', cursor: BigInt(orderId) === 0n ? 'not-allowed' : 'pointer' }}
+                  style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '4px 8px', border: 'none', borderRadius: 4, cursor: BigInt(orderId) === 0n ? 'not-allowed' : 'pointer' }}
                 >
                   ←
                 </button>
               )}
               <span style={{ fontWeight: 'bold', minWidth: '30px' }}>{orderId}</span>
-              {BigInt(maxOrderId) >= 2n && (
+              {BigInt(maxOrderId) >= 1n && (
                 <button 
                   onClick={handleNextOrder}
                   disabled={BigInt(orderId) >= BigInt(maxOrderId)}
-                  style={{ padding: '4px 8px', cursor: BigInt(orderId) >= BigInt(maxOrderId) ? 'not-allowed' : 'pointer' }}
+                  style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '4px 8px', border: 'none', borderRadius: 4, cursor: BigInt(orderId) >= BigInt(maxOrderId) ? 'not-allowed' : 'pointer' }}
                 >
                   →
                 </button>
@@ -376,20 +388,44 @@ export default function App() {
             <input value={shipmentEth} onChange={e=>setShipmentEth(e.target.value)} style={{ width: 120 }} />
           </div>
           <div style={{ marginTop: 8 }}>
-            <button onClick={handleSetPrice} disabled={!contract}>Set Price</button>
+            <button 
+              onClick={handleSetPrice} 
+              disabled={!contract}
+              style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '8px 16px', border: 'none', borderRadius: 4, cursor: !contract ? 'not-allowed' : 'pointer' }}
+            >
+              Set Price
+            </button>
           </div>
         </div>
 
         <div style={{ border:'1px solid #eee', padding:12, borderRadius:8 }}>
           <h4>Process / Pay</h4>
           <div>
-            <button onClick={handleMarkProcessing} disabled={!contract}>Mark Processing</button>
+            <button 
+              onClick={handleMarkProcessing} 
+              disabled={!contract}
+              style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '8px 16px', border: 'none', borderRadius: 4, cursor: !contract ? 'not-allowed' : 'pointer' }}
+            >
+              Mark Processing
+            </button>
           </div>
           <div style={{ marginTop: 8 }}>
-            <button onClick={handleRequestPayment} disabled={!contract}>Request Payment</button>
+            <button 
+              onClick={handleRequestPayment} 
+              disabled={!contract}
+              style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '8px 16px', border: 'none', borderRadius: 4, cursor: !contract ? 'not-allowed' : 'pointer' }}
+            >
+              Request Payment
+            </button>
           </div>
           <div style={{ marginTop: 8 }}>
-            <button onClick={handlePay} disabled={!contract}>Pay (reads total)</button>
+            <button 
+              onClick={handlePay} 
+              disabled={!contract}
+              style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '8px 16px', border: 'none', borderRadius: 4, cursor: !contract ? 'not-allowed' : 'pointer' }}
+            >
+              Pay (reads total)
+            </button>
           </div>
         </div>
 
@@ -400,7 +436,13 @@ export default function App() {
             <input value={invoiceUri} onChange={e=>setInvoiceUri(e.target.value)} style={{ width: 300 }} />
           </div>
           <div style={{ marginTop: 8 }}>
-            <button onClick={handleUploadInvoice} disabled={!contract}>Upload Invoice & Close Order</button>
+            <button 
+              onClick={handleUploadInvoice} 
+              disabled={!contract}
+              style={{ fontWeight: 'bold', backgroundColor: '#667', color: 'white', padding: '8px 16px', border: 'none', borderRadius: 4, cursor: !contract ? 'not-allowed' : 'pointer' }}
+            >
+              Upload Invoice & Close Order
+            </button>
           </div>
           <small style={{ color: '#666', display: 'block', marginTop: 8 }}>
             Uploads invoice and automatically closes order with payouts
@@ -412,8 +454,8 @@ export default function App() {
           {order ? (
             <div style={{ 
               fontFamily: 'monospace',
-              opacity: order.status === 6 ? 0.6 : 1,
-              backgroundColor: order.status === 6 ? '#f5f5f5' : 'transparent',
+              opacity: order.status === 6 ? 1 : 1,
+              backgroundColor: order.status === 6 ? '#d4f4dd' : 'transparent',
               padding: order.status === 6 ? 8 : 0,
               borderRadius: order.status === 6 ? 4 : 0
             }}>
