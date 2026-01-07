@@ -13,5 +13,5 @@ https://github.com/supermario9000/BlockChain/tree/Hash-function-header-cpp
 __My own smart contract simulation on the Sepolia Eth network:__  
 https://github.com/supermario9000/BlockChain/tree/Smart-contract
 
-__Hyperledger fabric adventures:__  
+__Hyperledger fabric adventures (very incomplete, not much progress made):__  
 https://github.com/supermario9000/BlockChain/tree/Hyperledger-fabric
